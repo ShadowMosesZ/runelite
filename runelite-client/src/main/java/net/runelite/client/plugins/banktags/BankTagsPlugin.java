@@ -126,6 +126,7 @@ public class BankTagsPlugin extends Plugin implements MouseWheelListener, KeyLis
 	private KeyManager keyManager;
 
 	private boolean shiftPressed = false;
+	private int nextRowIndex = 0;
 
 	@Provides
 	BankTagsConfig getConfig(ConfigManager configManager)
@@ -155,6 +156,13 @@ public class BankTagsPlugin extends Plugin implements MouseWheelListener, KeyLis
 		}
 
 		shiftPressed = false;
+	}
+
+	private boolean isSearching()
+	{
+		return client.getVar(VarClientInt.INPUT_TYPE) == InputType.SEARCH.getType()
+			|| (client.getVar(VarClientInt.INPUT_TYPE) <= 0
+			&& client.getVar(VarClientStr.INPUT_TEXT) != null && client.getVar(VarClientStr.INPUT_TEXT).length() > 0);
 	}
 
 	@Subscribe
@@ -205,6 +213,61 @@ public class BankTagsPlugin extends Plugin implements MouseWheelListener, KeyLis
 				break;
 			case "getSearchingTagTab":
 				intStack[intStackSize - 1] = tabInterface.isActive() ? 1 : 0;
+				break;
+		}
+
+		if (!config.removeSeparators() || !isSearching() || !tabInterface.isActive())
+		{
+			return;
+		}
+
+		switch (eventName)
+		{
+			case "lineSpace":
+				// prevent Y value being incremented to account for line separators
+				intStack[intStackSize - 1] = 0;
+				break;
+			case "tabTextSpace":
+				// prevent Y value being incremented to account for "Tab x" text
+				intStack[intStackSize - 1] = 0;
+				break;
+			case "hideLine":
+				// hide the widget for the line separator
+				intStack[intStackSize - 1] = 1;
+				break;
+			case "hideTabText":
+				// hide the widget for the "Tab x" text
+				intStack[intStackSize - 1] = 1;
+				break;
+			case "rowIndex":
+				// remember the next index in the row so we can start the next tab's items there
+				nextRowIndex = intStack[intStackSize - 1];
+				break;
+			case "rowIndexInit":
+				// set the index to our remembered value instead of 0
+				intStack[intStackSize - 1] = nextRowIndex;
+				break;
+			case "bankLayoutInit":
+				// reset the row index if the bank is rebuilt
+				nextRowIndex = 0;
+				break;
+			case "newBankRow":
+				// if we haven't filled a row when the current tab is finished building,
+				// adjust the y offset to continue the next tab on the same row
+				if (nextRowIndex != 0)
+				{
+					intStack[intStackSize - 2] = intStack[intStackSize - 2] - 32;
+				}
+				// if we have filled the row, adjust the y offset to maintain appropriate row spacing
+				else
+				{
+					intStack[intStackSize - 2] = intStack[intStackSize - 2] + 4;
+				}
+				break;
+			case "addLastRow":
+				// after all tabs are finished building, add an extra row of space
+				// this ensures the scrollbar is set to the correct height
+				intStack[intStackSize - 1] = intStack[intStackSize - 1] + 32;
 				break;
 		}
 	}

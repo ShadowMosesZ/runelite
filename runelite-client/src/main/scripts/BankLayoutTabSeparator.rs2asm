@@ -22,10 +22,14 @@ LABEL10:
    load_int               0
    widget_put_position   
    load_int               0
+   load_string            "hideLine"  ;
+   runelite_callback                  ;
    widget_put_hidden
 LABEL19:
    iload                  2
    load_int               12
+   load_string            "lineSpace" ;
+   runelite_callback                  ;
    iadd                  
    return                
    load_int               0

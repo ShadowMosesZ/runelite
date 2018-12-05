@@ -22,6 +22,8 @@ LABEL10:
 LABEL14:
    iload                  8
    load_int               15
+   load_string            "tabTextSpace" ;
+   runelite_callback                     ;
    iadd                  
    istore                 12
    jump                   LABEL21
@@ -36,6 +38,8 @@ LABEL21:
    load_int               0
    istore                 15
    load_int               0
+   load_string            "rowIndexInit" ;
+   runelite_callback                     ;
    istore                 16
    load_int               0
    istore                 17
@@ -107,6 +111,8 @@ LABEL91:
    iload                  16
    load_int               1
    iadd
+   load_string            "rowIndex" ;
+   runelite_callback                 ;
    istore                 16
    jump                   LABEL102
 LABEL96:
@@ -115,6 +121,8 @@ LABEL96:
    load_int               1
    iadd                  
    istore                 17
+   load_string            "rowIndex" ;
+   runelite_callback                 ;
    istore                 16
 LABEL102:
    iload                  0
@@ -156,6 +164,8 @@ LABEL122:
    jump                   LABEL166
 LABEL134:
    load_int               0
+   load_string            "hideTabText" ;
+   runelite_callback                    ;
    widget_put_hidden     
    load_int               51
    iload                  16
@@ -212,9 +222,15 @@ LABEL182:
    load_int               0
    widget_put_position   
    load_int               0
+   load_string            "hideTabText" ;
+   runelite_callback                    ;
    widget_put_hidden     
 LABEL189:
    iload                  14
+   iload                  2            ;
+   load_string            "newBankRow" ;
+   runelite_callback                   ;
+   pop_int                             ;
    iload                  15
    return                
    load_int               0

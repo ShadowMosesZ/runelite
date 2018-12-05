@@ -3,6 +3,8 @@
 .string_stack_count 0
 .int_var_count      31
 .string_var_count   1
+   load_string            "bankLayoutInit"   ;
+   runelite_callback                         ;
    get_varbit             5102
    load_int               1
    if_icmpeq              LABEL4
@@ -721,6 +723,8 @@ LABEL641:
    iload                  11
    iload                  12
    iload                  23
+   load_string            "addLastRow"    ;
+   runelite_callback                      ;
    iload                  24
    invoke                 505
    return                
@@ -797,7 +801,7 @@ LABEL707:
    invoke                 278
    iload                  30
    load_int               36
-   imul                  
+   imul
    istore                 23
    load_int               51
    iload                  29
