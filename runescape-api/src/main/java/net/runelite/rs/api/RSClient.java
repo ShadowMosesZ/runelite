@@ -557,6 +557,9 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("queuedSoundEffectCount")
 	void setQueuedSoundEffectCount(int queuedSoundEffectCount);
 
+	@Import("queueSoundEffect")
+	void queueSoundEffect(int id, int unknownValue, int delay);
+
 	@Import("rasterProvider")
 	@Override
 	RSBufferProvider getBufferProvider();
@@ -925,4 +928,22 @@ public interface RSClient extends RSGameEngine, Client
 	@Import("spellSelected")
 	@Override
 	void setSpellSelected(boolean selected);
+
+	@Import("getTrack")
+	RSSoundEffect getTrack(RSIndexData indexData, int id, int var0);
+
+	@Import("createSoundEffectAudioTaskNode")
+	RSAudioTaskNode createSoundEffectAudioTaskNode(RSRawAudioNode audioNode, int var0, int volume);
+
+	@Import("soundEffectAudioQueue")
+	RSAudioTaskNodeQueue getSoundEffectAudioQueue();
+
+	@Import("indexCache4")
+	RSIndexData getIndexCache4();
+
+	@Import("soundEffectResampler")
+	RSResampler getSoundEffectResampler();
+
+	@Import("soundEffectVolume")
+	int getSoundEffectVolume();
 }
