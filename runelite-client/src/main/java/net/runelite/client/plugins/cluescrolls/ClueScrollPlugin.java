@@ -84,6 +84,8 @@ import net.runelite.client.plugins.cluescrolls.clues.ObjectClueScroll;
 import net.runelite.client.plugins.cluescrolls.clues.TextClueScroll;
 import net.runelite.client.plugins.cluescrolls.clues.ThreeStepCrypticClue;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.ui.overlay.hintarrow.HintArrow;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowManager;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.Text;
@@ -138,10 +140,14 @@ public class ClueScrollPlugin extends Plugin
 	@Inject
 	private WorldMapPointManager worldMapPointManager;
 
+	@Inject
+	private HintArrowManager hintArrowManager;
+
 	private BufferedImage emoteImage;
 	private BufferedImage mapArrow;
 	private Integer clueItemId;
 	private boolean worldMapPointsSet = false;
+	private HintArrow activeHintArrow;
 
 	@Provides
 	ClueScrollConfig getConfig(ConfigManager configManager)
@@ -253,7 +259,8 @@ public class ClueScrollPlugin extends Plugin
 
 				if (config.displayHintArrows())
 				{
-					client.clearHintArrow();
+					hintArrowManager.remove(activeHintArrow);
+					activeHintArrow = null;
 				}
 
 				checkClueNPCs(clue, client.getCachedNPCs());
@@ -277,12 +284,14 @@ public class ClueScrollPlugin extends Plugin
 		{
 			if (npcsToMark.isEmpty())
 			{
-				client.clearHintArrow();
+				hintArrowManager.remove(activeHintArrow);
+				activeHintArrow = null;
 			}
 			else
 			{
+				hintArrowManager.remove(activeHintArrow);
 				// Always set hint arrow to first seen NPC
-				client.setHintArrow(npcsToMark.get(0));
+				activeHintArrow = hintArrowManager.add(npcsToMark.get(0));
 			}
 		}
 	}
@@ -292,7 +301,8 @@ public class ClueScrollPlugin extends Plugin
 	{
 		if (event.getGroup().equals("cluescroll") && !config.displayHintArrows())
 		{
-			client.clearHintArrow();
+			hintArrowManager.remove(activeHintArrow);
+			activeHintArrow = null;
 		}
 	}
 
@@ -344,10 +354,10 @@ public class ClueScrollPlugin extends Plugin
 			{
 				// Only set the location hint arrow if we do not already have more accurate location
 				if (config.displayHintArrows()
-					&& (client.getHintArrowNpc() == null
-					|| !npcsToMark.contains(client.getHintArrowNpc())))
+					&& (activeHintArrow == null
+					|| !npcsToMark.contains(activeHintArrow.getActor())))
 				{
-					client.setHintArrow(location);
+					activeHintArrow = hintArrowManager.add(location);
 				}
 
 				addMapPoints(location);
@@ -422,7 +432,8 @@ public class ClueScrollPlugin extends Plugin
 
 		if (config.displayHintArrows())
 		{
-			client.clearHintArrow();
+			hintArrowManager.remove(activeHintArrow);
+			activeHintArrow = null;
 		}
 	}
 
@@ -652,8 +663,9 @@ public class ClueScrollPlugin extends Plugin
 
 		if (!npcsToMark.isEmpty() && config.displayHintArrows())
 		{
+			hintArrowManager.remove(activeHintArrow);
 			// Always set hint arrow to first seen NPC
-			client.setHintArrow(npcsToMark.get(0));
+			activeHintArrow = hintArrowManager.add(npcsToMark.get(0));
 		}
 	}
 
