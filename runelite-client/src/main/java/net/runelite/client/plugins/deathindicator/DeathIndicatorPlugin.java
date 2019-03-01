@@ -46,6 +46,8 @@ import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.hintarrow.HintArrow;
+import net.runelite.client.ui.overlay.hintarrow.HintArrowManager;
 import net.runelite.client.ui.overlay.infobox.InfoBoxManager;
 import net.runelite.client.ui.overlay.infobox.Timer;
 import net.runelite.client.ui.overlay.worldmap.WorldMapPointManager;
@@ -81,6 +83,9 @@ public class DeathIndicatorPlugin extends Plugin
 	@Inject
 	private ItemManager itemManager;
 
+	@Inject
+	private HintArrowManager hintArrowManager;
+
 	private BufferedImage mapArrow;
 
 	private Timer deathTimer;
@@ -88,6 +93,7 @@ public class DeathIndicatorPlugin extends Plugin
 	private WorldPoint lastDeath;
 	private Instant lastDeathTime;
 	private int lastDeathWorld;
+	private HintArrow activeHintArrow;
 
 	@Provides
 	DeathIndicatorConfig deathIndicatorConfig(ConfigManager configManager)
@@ -112,10 +118,7 @@ public class DeathIndicatorPlugin extends Plugin
 
 		if (config.showDeathHintArrow())
 		{
-			if (!client.hasHintArrow())
-			{
-				client.setHintArrow(new WorldPoint(config.deathLocationX(), config.deathLocationY(), config.deathLocationPlane()));
-			}
+			activeHintArrow = hintArrowManager.add(new WorldPoint(config.deathLocationX(), config.deathLocationY(), config.deathLocationPlane()));
 		}
 
 		if (config.showDeathOnWorldMap())
@@ -128,10 +131,7 @@ public class DeathIndicatorPlugin extends Plugin
 	@Override
 	protected void shutDown()
 	{
-		if (client.hasHintArrow())
-		{
-			client.clearHintArrow();
-		}
+		hintArrowManager.remove(activeHintArrow);
 
 		if (deathTimer != null)
 		{
@@ -182,7 +182,8 @@ public class DeathIndicatorPlugin extends Plugin
 
 			if (config.showDeathHintArrow())
 			{
-				client.setHintArrow(lastDeath);
+				hintArrowManager.remove(activeHintArrow);
+				activeHintArrow = hintArrowManager.add(lastDeath);
 			}
 
 			if (config.showDeathOnWorldMap())
@@ -206,7 +207,7 @@ public class DeathIndicatorPlugin extends Plugin
 		WorldPoint deathPoint = new WorldPoint(config.deathLocationX(), config.deathLocationY(), config.deathLocationPlane());
 		if (deathPoint.equals(client.getLocalPlayer().getWorldLocation()) || (deathTimer != null && deathTimer.cull()))
 		{
-			client.clearHintArrow();
+			hintArrowManager.remove(activeHintArrow);
 
 			if (deathTimer != null)
 			{
@@ -227,7 +228,7 @@ public class DeathIndicatorPlugin extends Plugin
 		{
 			if (!config.showDeathHintArrow() && hasDied())
 			{
-				client.clearHintArrow();
+				hintArrowManager.remove(activeHintArrow);
 			}
 
 			if (!config.showDeathInfoBox() && deathTimer != null)
@@ -243,7 +244,7 @@ public class DeathIndicatorPlugin extends Plugin
 
 			if (!hasDied())
 			{
-				client.clearHintArrow();
+				hintArrowManager.remove(activeHintArrow);
 
 				resetInfobox();
 
@@ -268,7 +269,7 @@ public class DeathIndicatorPlugin extends Plugin
 
 				if (config.showDeathHintArrow())
 				{
-					client.setHintArrow(deathPoint);
+					activeHintArrow = hintArrowManager.add(deathPoint);
 				}
 
 				if (config.showDeathOnWorldMap())
